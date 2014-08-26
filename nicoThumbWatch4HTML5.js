@@ -36,8 +36,7 @@ function convertNicoToHTML5(embed){
     'background' : 'black',
     'border' : '1px solid black',
     'width' : embed.offsetWidth+'px',
-    'height' : embed.offsetHeight+'px',
-    /*'visibility':'hidden'*/
+    'height' : embed.offsetHeight+'px'
   });
 
   var nicovideo = document.createElement('video');
