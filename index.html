@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NicoPlayer</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="content-language" content="ja">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 動作に必要なのはココの部分 -->
+  <script src="./nicoThumbWatch4HTML5.js"></script>
+  <!-- ここまで -->
+</head>
+<body style='text-align:center;'>
+  <span style="font-weight:bold;">NicoThumbWatch4HTML5 0.0.1</span><br>
+  <span>ニコニコ外部プレイヤーをFlash非対応でも見れるようにするJavascript.</span><br><br>
+  <span>iPhoneのSafariとAndroidのChrome,Firefoxは確認.</span><br>
+  <span>他スクリプト等との干渉は未検証.</span><br><br>
+  <span>利用は自己責任.転載禁止.</span><br><br>
+  <a href='./js/nicoThumbWatch.js'><span>Download.</span></a><br><br>
+
+  <span>### Sample ###</span><br>
+  <span>### Flash対応ブラウザでは従来表示 ###</span><br><br>
+  <!-- 従来の方法でニコニコ外部プレイヤーのスクリプトを貼るだけです -->
+  <script src="http://ext.nicovideo.jp/thumb_watch?v=sm9&w=240&h=180"></script>
+  <script src="http://ext.nicovideo.jp/thumb_watch?v=sm83&w=240&h=180"></script> <br>
+  <script src="http://ext.nicovideo.jp/thumb_watch?v=sm1097445"></script> <br>
+  <script src="http://ext.nicovideo.jp/thumb_watch?v=sm8628149"></script> <br><br>
+
+  <!-- sm以外の動画は今まで通りリンクが貼られます -->
+  <span>※sm以外の動画は今まで通りリンクが貼られます.</span><br>
+  <script src="http://ext.nicovideo.jp/thumb_watch?v=nm6049209"></script> <br><br>
+
+  <a href='../'><span>Return</span></a><br><br>
+
+  <span style="font-weight:bold;">NicoThumbWatch4HTML5についてのメモ</span><br><br>
+  <span>thumb_watchで動画URLが取得できるが,JavaScriptからはXSS対策でアクセス出来ない.</span><br>
+  <span>不本意ながら,GoogleAppsScriptで取得したデータをJSONPで飛ばすことで対応.</span><br>
+  <span>視聴にはCookieが必要なので,非表示iframeでthumb_watchにvとthumbPlayKeyを与えて取得.</span><br>
+<script type="text/javascript"><!--
+var fc2footerparam = 'cs=' + (document.charset ? document.charset : document.characterSet) + '&dm=' + document.location + '&rnd=' + Math.floor(Math.random()*99999999999);
+var fc2footertag = '<' + 'script src="http://web.fc2.com/footer/footer.php?' + fc2footerparam + '" charset="UTF-8"><' + '/script>';
+document.write(fc2footertag);
+//--></script>
+<!-- FC2, inc.-->
+<img src="http://media.fc2.com/counter_img.php?id=50" style="visibility:hidden" alt="inserted by FC2 system" width="0" height="0" />
+<!-- FC2, inc.-->
+</body>
+</html>

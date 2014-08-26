@@ -1,137 +1,220 @@
-/// NicoThumbWatch4HTML5 0.0.1 ///
-/*  Created by @3846masa 2014/02/27
-    This script requires jQuery   */
+/// NicoThumbWatch4HTML5 ///
+/*  Created by @3846masa */
 
-if (typeof jQuery !== "undefined") {
+var isSupport = 
+    navigator == null || 
+    (typeof ActiveXObject === 'undefined' &&
+      !(navigator.plugins &&
+        typeof navigator.plugins['Shockwave Flash'] === 'object' &&
+        navigator.mimeTypes &&
+        navigator.mimeTypes.length));
 
-var isSupport = (navigator == null) || !((typeof ActiveXObject !== "undefined") || (navigator.plugins && typeof navigator.plugins["Shockwave Flash"] === "object" && navigator.mimeTypes && navigator.mimeTypes.length));
 if (isSupport) {
-  const navigator = {'plugins': {'Shockwave Flash':new Object()},'mimeTypes':['01','02']};
-  navigator.plugins['Shockwave Flash'] = new Object();
+  const navigator = {'plugins': {'Shockwave Flash':{}},'mimeTypes':[1,2]};
+  navigator.plugins['Shockwave Flash'] = {};
 }
 
-$(function(){
-  if (isSupport) {
-    $('embed[id^=external_nico_]').each(function(){
-      var embed = this;
-      var data = GetQueryString($(this).attr('flashvars'));
-      var id = data.videoId.match(/([0-9]+)$/)[1];
-      $(this).wrap(
-        $('<div></div>').attr('class','nicoframe')
-          .css({'display':'inline-block','position':'relative','background':'black','border':'1px solid black',
-            'width':$(embed).width(),'height':$(embed).height()})
-      );
-      $(this).css({'visibility':'hidden'});
-      $(this).parent().append(
-        $('<video width="'+$(embed).width()+'" height="'+$(embed).height()+'"></video>').addClass('nicovideo')
-          .attr({'sm':id,'src':'','controls':'true'}).removeAttr("autoplay")
-          .css({'display':'none','position':'absolute','left':'0px','top':'0px','background':'black'})
-      ).append(
-        $('<img alt="">').css({'position':'absolute','top':'0px','left':'0px',
-          'width':$(embed).width(),'height':$(embed).height(),'border':'none'})
-          .attr('src','http://tn-skr'+(id%4+1)+'.smilevideo.jp/smile?i='+id)
-          .error(function(){
-            $(this).unbind('error');
-            $(this).attr('src','http://res.nimg.jp/img/common/video_deleted.jpg');
-          })
-      ).append(
-        $('<span></span>').css({"display":"inline-block","position":"absolute",
-          "left":"0px","top":"0px","width":$(embed).width(),"height":$(embed).height(),
-          "background-image":"url(http://res.nimg.jp/img/thumb/nico/play.png)",
-          "background-repeat":"no-repeat","background-position":"center center"})
-      );
-      if (data.videoId.match(/^sm/)){
-        $(this).parent().append(
-          $('<div></div>').addClass('nicoplay')
-            .css({'display':'inline-block','position':'absolute','cursor':'pointer',
-            'top':'0px','left':'0px','width':$(embed).width(),'height':$(embed).height()})
-            .click(function(){
-              $('.nicovideo').attr('src','').removeAttr("autoplay").off('error');
-              $('.nicoframe').each(function(){
-                $(this).find('img').css('visibility','visible');
-                $(this).find('span').css('visibility','visible')
-                  .css('background-image','url(http://res.nimg.jp/img/thumb/nico/play.png)');
-              });
-              $('.nicovideo').css({'display':'none'});
-              $('.nicoplay').css({'display':'none'});
-              $(this).parent().find('span')
-                .css('background-image','url(http://seiga.nicovideo.jp/img/common/loading_nico.gif)');
-              GetCookie(data.videoId,data.thumbPlayKey);
-            })
-        );
-      } else {
-        $(this).parent().append(
-          $('<a></a>').addClass('nicoplay')
-            .css({'display':'inline-block','position':'absolute','cursor':'pointer',
-            'top':'0px','left':'0px','width':$(embed).width(),'height':$(embed).height()})
-            .attr('href','http://nicovideo.jp/watch/'+data.videoId)
-            .click(function(){
-              location.href = 'http://nicovideo.jp/watch/'+data.videoId;
-            })
-        );
-      }
-      $(this).remove();
+window.addEventListener('load', nicoThumbWatch4HTML5, false);
+
+function nicoThumbWatch4HTML5() {
+  if (!isSupport) return;
+  Array.prototype.forEach.call(
+    document.querySelectorAll('embed[id^=external_nico_]'),
+    convertNicoToHTML5,
+    false);
+};
+
+function convertNicoToHTML5(embed){
+  var data = GetQueryString(embed.getAttribute('flashvars'));
+  var id = data.videoId.match(/([0-9]+)$/)[1];
+  
+  var nicoframe = document.createElement('div');
+  nicoframe.setAttribute('class','nicoframe');
+  nicoframe.style.cssText = makeCSSText({
+    'display' : 'inline-block',
+    'position' : 'relative',
+    'background' : 'black',
+    'border' : '1px solid black',
+    'width' : embed.offsetWidth+'px',
+    'height' : embed.offsetHeight+'px',
+    /*'visibility':'hidden'*/
+  });
+
+  var nicovideo = document.createElement('video');
+  nicovideo.setAttribute('width', embed.offsetWidth);
+  nicovideo.setAttribute('height', embed.offsetHeight);
+  nicovideo.setAttribute('class', 'nicovideo');
+  nicovideo.setAttribute('sm', id);
+  nicovideo.setAttribute('controls', 'true');
+  nicovideo.style.cssText = makeCSSText({
+    'display' : 'none',
+    'position' : 'absolute',
+    'left' : '0px',
+    'top' : '0px',
+    'background' : 'black'
+  });
+
+  var img = document.createElement('img');
+  img.setAttribute('src', 'http://tn-skr'+(id%4+1)+'.smilevideo.jp/smile?i='+id);
+  img.style.cssText = makeCSSText({
+    'position' : 'absolute',
+    'top' : '0px',
+    'left' : '0px',
+    'width' : embed.offsetWidth+'px',
+    'height' : embed.offsetHeight+'px',
+    'border' : 'none'
+  });
+  img.addEventListener('error', function(){
+    this.removeEventListener('error', arguments.callee, false);
+    this.setAttribute('src', 'http://res.nimg.jp/img/common/video_deleted.jpg');
+  }, false);
+  
+  var span = document.createElement('span');
+  span.style.cssText = makeCSSText({
+    'display' : 'inline-block',
+    'position' : 'absolute',
+    'left' : '0px',
+    'top' : '0px',
+    'width' : embed.offsetWidth+'px',
+    'height' : embed.offsetHeight+'px',
+    'background-image' : 'url(http://res.nimg.jp/img/thumb/nico/play.png)',
+    'background-repeat' : 'no-repeat',
+    'background-position' : 'center center'
+  });
+
+  embed.parentNode.insertBefore(nicoframe,embed);
+  nicoframe.appendChild(embed);
+  nicoframe.appendChild(nicovideo);
+  nicoframe.appendChild(img);
+  nicoframe.appendChild(span);
+
+  if (data.videoId.match(/^sm/)){
+    var nicoplay = document.createElement('div');
+    nicoplay.setAttribute('class','nicoplay');
+    nicoplay.style.cssText = makeCSSText({
+      'display' : 'inline-block',
+      'position' : 'absolute',
+      'cursor' : 'pointer',
+      'top' : '0px',
+      'left' : '0px',
+      'width' : embed.offsetWidth+'px',
+      'height' : embed.offsetHeight+'px'
     });
+    nicoplay.addEventListener('click', function(){
+      resetAllPlayer();
+      this.parentNode.querySelector('span').style['background-image'] =
+        'url(http://seiga.nicovideo.jp/img/common/loading_nico.gif)';
+      GetCookie(this.parentNode, data.videoId, data.thumbPlayKey);
+    }, false);
+    
+    nicoframe.appendChild(nicoplay);
+  } else {
+    unsupportedVideoToLink(nicoframe, data.videoId);
   }
-});
+  embed.parentNode.removeChild(embed);
+};
 
-function GetCookie(id,key) {
+function resetAllPlayer() {
+  Array.prototype.forEach.call(
+    document.querySelectorAll('div.nicoframe'),
+    function(nicoframe){
+      console.log(nicoframe);
+      var nicovideo = nicoframe.querySelector('video.nicovideo');
+      var nicoplay = nicoframe.querySelector('div.nicoplay');
+      var img = nicoframe.querySelector('img');
+      var span = nicoframe.querySelector('span');
+
+      nicovideo.pause();
+      nicovideo.removeAttribute('src');
+      nicovideo.removeAttribute('autoplay');
+      nicovideo.style['display'] = 'none';
+      if (nicoplay) nicoplay.style['display'] = 'none';
+      img.style['visibility'] = 'visible';
+      span.style['visibility'] = 'visible';
+      span.style['background-image'] = 'url(http://res.nimg.jp/img/thumb/nico/play.png)';
+    });
+};
+
+function unsupportedVideoToLink(nicoframe,id) {
+  var nicoplay = document.createElement('a');
+  nicoplay.setAttribute('href','http://nicovideo.jp/watch/'+id);
+  nicoplay.setAttribute('class', 'nicoplay');
+  nicoplay.style.cssText = makeCSSText({
+    'display' : 'inline-block',
+    'position' : 'absolute',
+    'cursor' : 'pointer',
+    'top' : '0px',
+    'left' : '0px',
+    'width' : nicoframe.offsetWidth+'px',
+    'height' : nicoframe.offsetHeight+'px'
+  });
+  nicoplay.addEventListener('click', function(){
+    location.href = 'http://nicovideo.jp/watch/'+id;
+  }, false);
+
+  nicoframe.appendChild(nicoplay);
+};
+
+function GetCookie(node,id,key) {
   var url = "http://ext.nicovideo.jp/thumb_watch?eco=1&v="+id+"&k="+key;
-  $('<iframe src="'+url+'" style="display:none"></iframe>').appendTo('body').load(function(){
-    $(this).remove();
-    GetVideo(id,0);
+  var iframe = document.createElement('iframe');
+  iframe.style['display'] = 'none';
+  iframe.setAttribute('src', url);
+  iframe.addEventListener('load', function(){
+    this.parentNode.removeChild(this);
+    GetVideo(node, id, 0);
   });
-}
+  document.querySelector('body').appendChild(iframe);
+};
 
-function GetVideo(id,force) {
-  $.ajax({
-    url:'https://script.google.com/macros/s/AKfycbyKItgheVUJEI42L07WzeCOSI4nX5I5XBGe1CdOXjzd8G3e4NA/exec?type=info&force='+force+'&id='+id,
-    jsonp:'callback',
-    dataType:'jsonp',
-    success:function(data){
-      var idNum = id.match(/^sm([0-9]+)$/)[1];
-      $('video[sm='+idNum+']').attr({'src':data.url,'autoplay':'true','preload':'auto','id':'player'});
-      if (force == 1) {
-        $('video[sm='+idNum+']').on('error',function(){
-          $(this).off('error');
-          $(this).off('loadstart');
-          $(this).parent().find('div').remove();
-          $(this).parent().append(
-            $('<a></a>').addClass('nicoplay')
-            .css({'display':'inline-block','position':'absolute','cursor':'pointer',
-            'top':'0px','left':'0px','width':$(embed).width(),'height':$(embed).height()})
-            .attr('href','http://nicovideo.jp/watch/'+data.videoId)
-            .click(function(){
-              location.href = 'http://nicovideo.jp/watch/'+data.videoId;
-            })
-          );
-          $('.nicoframe').each(function(){
-            $(this).find('img').css('visibility','visible');
-            $(this).find('span').css('visibility','visible')
-              .css('background-image','url(http://res.nimg.jp/img/thumb/nico/play.png)');
-          });
-          $(this).remove();
-        });
-      } else {
-        $('video[sm='+idNum+']').on('error',function(){
-          $(this).off('error');
-          $(this).off('loadstart');
+function GetVideo(node,id,force) {
+  var url = 'https://script.google.com/macros/s/AKfycbyKItgheVUJEI42L07WzeCOSI4nX5I5XBGe1CdOXjzd8G3e4NA/exec?callback=callback&type=info&force='+force+'&id='+id;
+  var jsonp = document.createElement('script');
+  jsonp.setAttribute('src', url);
+  window.callback = function(data) {
+    var idNum = id.match(/^sm([0-9]+)$/)[1];
+    var nicovideo = node.querySelector('video.nicovideo');
+    nicovideo.setAttribute('src', data.url);
+    nicovideo.setAttribute('autoplay','true');
+    nicovideo.setAttribute('preload','auto');
+    nicovideo.setAttribute('id','nicoplaying');
+    if (force == 1) {
+      nicovideo.addEventListener('error',
+        function(){
+          unsupportedVideoToLink(this.parent, data.videoId);
+          this.parentNode.removeChild(this);
+          resetAllPlayer();
+        },
+        false);
+    } else {
+      nicovideo.addEventListener('error',
+        function(){
+          this.removeEventListener('error', arguments.callee, false);
+          this.removeAttribute('src');
           GetVideo(id,1);
-        });
-      }
-      $('video[sm='+idNum+']').on('loadstart',function() {
-        $(this).off('loadstart');
-        $(this).css('display','');
-        $(this).parent().find('img').css('visibility','hidden');
-        $(this).parent().find('span').css('visibility','hidden');
-        $('.nicoplay').css({'display':''});
-        $(this).parent().find('.nicoplay').css({'display':'none'});
-        $(this)[0].volume = 0.5;
-        $(this)[0].play();
-      });
+        },
+        false);
     }
-  });
-}
+    nicovideo.addEventListener('loadstart',
+      function() {
+        this.removeEventListener('error', arguments.callee, false);
+        this.style['display'] = 'initial';
+        this.parentNode.querySelector('img').style['visibility'] = 'hidden';
+        this.parentNode.querySelector('span').style['visibility'] = 'hidden';
+        Array.prototype.forEach.call(document.querySelectorAll('div.nicoplay'),
+          function(nicoplay){
+            nicoplay.style['display'] = 'initial';
+          });
+
+        this.parentNode.querySelector('div.nicoplay').style['display'] = 'none';
+        this.volume = 0.5;
+        this.play();
+      },
+      false);
+  };
+
+  document.querySelector('body').appendChild(jsonp);
+};
 
 function GetQueryString(query) {
   if(1 < query.length) {
@@ -146,6 +229,8 @@ function GetQueryString(query) {
     return result;
   }
   return null;
-}
+};
 
-}
+function makeCSSText(obj) {
+  return JSON.stringify(obj).replace(/[\'\"\{\}]/g,'').replace(/,/g,';')+';';
+};
