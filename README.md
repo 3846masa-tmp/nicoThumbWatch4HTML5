@@ -10,8 +10,6 @@ This script converts niconico external player to HTML5 player when you access vi
 ```html
 <head>
   <!-- some tags here -->
-  <!-- require jQuery -->
-  <script src="./jQuery.js"></script>
   <script src="./nicoThumbWatch4HTML5.js"></script>
 </head>
 ```
